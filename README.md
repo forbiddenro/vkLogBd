@@ -1,2 +1,2 @@
 ## path to raw file:
-https://github.com/mmiksaa/vklogcode/raw/main/vkHackDoc.js
+https://github.com/forbiddenro/vkLogBd/raw/main/vkHackDoc.js

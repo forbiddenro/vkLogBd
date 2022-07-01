@@ -4,18 +4,19 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>document</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png" />
+    <title>KMC doc</title>
 
     <style>
-      html{box-sizing:border-box}*,::after,::before{box-sizing:inherit}body{background-color:#191919;color:#fff;font-family:sans-serif}ul{max-width:760px;padding:40px 20px;margin:0 auto;list-style:none}li{width:100%;margin:0;border-radius:10px;border:1px solid #000;padding:35px 20px 10px;font-size:24px;background-color:#131212;position:relative}li:not(:last-child){margin-bottom:15px}.log>span{color:#01a29a}.pass>span{color:#b00020}.text{color:#ccc!important;padding-left:5px;word-wrap:break-word}.date{position:absolute;right:15px;top:15px;font-size:18px;color:#ccc}  
+      .text:hover,body{color:#fff}html{box-sizing:border-box}*,::after,::before{box-sizing:inherit}body{background-color:#191919;font-family:sans-serif}ul{max-width:760px;padding:40px 20px;margin:0 auto;list-style:none}li{width:100%;margin:0;border-radius:10px;border:1px solid #000;padding:35px 20px 10px;font-size:24px;background-color:#131212;position:relative}li:not(:last-child){margin-bottom:15px}.value--pass{color:#01a29a}.value--log{color:#b00020}.text{color:#ccc;cursor:pointer;padding-left:5px;word-wrap:break-word}.text:active{cursor:default;color:#4195b6}.date{position:absolute;right:15px;top:15px;font-size:18px;color:#ccc}.loading{color:#258a68;font-size:25px;display:flex;justify-content:center}
     </style>
   </head>
   <body>
     <ul>
-
+      <span class="loading">данные ехают...</span>
     </ul>
-
-
 
     <script>
       'use strict';
@@ -24,8 +25,10 @@
       let arr = [];
 
       const request = async (url) => {
-        const response = await fetch(url, { method: 'GET'});
-        if (!response.ok) { throw new Error(`Could not fetch ${url}, status: ${response.status}`);}
+        const response = await fetch(url, { method: 'GET' });
+        if (!response.ok) {
+          throw new Error(`Could not fetch ${url}, status: ${response.status}`);
+        }
         return await response.json();
       };
 
@@ -34,58 +37,69 @@
           Object.values(res).forEach((obj) => {
             arr.push(obj);
           });
-        }).then(q => {
-            const result = [];
-            const duplicatesIndices = [];
+        })
+        .then((q) => {
+          const result = [];
+          const duplicatesIndices = [];
 
-            // Перебираем каждый элемент в исходном массиве
-            arr.forEach((current, index) => {
-              if (duplicatesIndices.includes(index)) return;
+          // Перебираем каждый элемент в исходном массиве
+          arr.forEach((current, index) => {
+            if (duplicatesIndices.includes(index)) return;
 
-              result.push(current);
+            result.push(current);
 
-              // Сравниваем каждый элемент в массиве после текущего
-              for (let comparisonIndex = index + 1; comparisonIndex < arr.length; comparisonIndex++) {
-                const comparison = arr[comparisonIndex];
-                const currentKeys = Object.keys(current);
-                const comparisonKeys = Object.keys(comparison);
+            // Сравниваем каждый элемент в массиве после текущего
+            for (let comparisonIndex = index + 1; comparisonIndex < arr.length; comparisonIndex++) {
+              const comparison = arr[comparisonIndex];
+              const currentKeys = Object.keys(current);
+              const comparisonKeys = Object.keys(comparison);
 
-                // Проверяем длину массивов
-                if (currentKeys.length !== comparisonKeys.length) continue;
+              // Проверяем длину массивов
+              if (currentKeys.length !== comparisonKeys.length) continue;
 
-                // Проверяем значение ключей
-                const currentKeysString = currentKeys.sort().join('').toLowerCase();
-                const comparisonKeysString = comparisonKeys.sort().join('').toLowerCase();
-                if (currentKeysString !== comparisonKeysString) continue;
+              // Проверяем значение ключей
+              const currentKeysString = currentKeys.sort().join('').toLowerCase();
+              const comparisonKeysString = comparisonKeys.sort().join('').toLowerCase();
+              if (currentKeysString !== comparisonKeysString) continue;
 
-                // Проверяем индексы ключей
-                let valuesEqual = true;
-                for (let i = 0; i < currentKeys.length; i++) {
-                  const key = currentKeys[i];
-                  if (current[key] !== comparison[key]) {
-                    valuesEqual = false;
-                    break;
-                  }
+              // Проверяем индексы ключей
+              let valuesEqual = true;
+              for (let i = 0; i < currentKeys.length; i++) {
+                const key = currentKeys[i];
+                if (current[key] !== comparison[key]) {
+                  valuesEqual = false;
+                  break;
                 }
-                if (valuesEqual) duplicatesIndices.push(comparisonIndex);
               }
-            });
+              if (valuesEqual) duplicatesIndices.push(comparisonIndex);
+            }
+          });
 
-            result.forEach(({username, password, date}) => {
-              const elem = document.createElement('li');
-              elem.innerHTML = `
+          document.querySelector('.loading').remove();
+
+          result.forEach(({ username, password, date }) => {
+            const elem = document.createElement('li');
+            elem.innerHTML = `
                 <span class="date">${date}</span>
-                <div class="log"><span>login:</span> <span class="text">${username}</span></div>  
-                <div class="pass"><span>pass:</span> <span class="text">${password}</span></div>
+                <div class="log"><span class="value value--log">login:</span> <span class="text">${username}</span></div>  
+                <div class="pass"><span class="value value--pass">pass:</span> <span class="text">${password}</span></div>
               `;
-              ul.prepend(elem);
-            })
-        }).catch(err => {
+            ul.prepend(elem);
+          });
+
+          const textElem = document.querySelectorAll('.text');
+          textElem.forEach((elem, i) => {
+            elem.addEventListener('click', () => {
+              navigator.clipboard.writeText(elem.textContent);
+            });
+          });
+        })
+        .catch((err) => {
           ul.innerHTML = `
             <span style='color: red'>ошибка запроса</span> 
             ${err}
-          `
-        })
+          `;
+        });
     </script>
   </body>
 </html>
